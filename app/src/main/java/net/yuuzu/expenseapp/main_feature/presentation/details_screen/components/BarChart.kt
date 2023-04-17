@@ -43,8 +43,8 @@ import net.yuuzu.expenseapp.ui.theme.CustomFont
 @ExperimentalAnimationApi
 @Composable
 fun BarChart(
-    data: Map<Any, Float>,
-    offer: Float,
+    data: Map<String, Double>,
+    offer: Double,
     barCornersRadius: Float = 25f,
     barColor: Color = Color.Blue,
     barGradientColors: List<Color> = listOf(
@@ -167,7 +167,7 @@ fun BarChart(
                         itemWidth = barWidth
                     )
                     if (chosenBar >= 0) {
-                        chosenBarKey = data.toList()[chosenBar].first.toString()
+                        chosenBarKey = data.toList()[chosenBar].first
                     }
                 })
             },
@@ -188,7 +188,7 @@ fun BarChart(
                 for (item in data) {
                     val topLeft = Offset(
                         x = spaceStep,
-                        y = size.height - item.value * barScale - labelOffset
+                        y = (size.height - item.value * barScale - labelOffset).toFloat()
                     )
 
                     val currentBarColor = if (item.value >= offer) barWarningsGradientColors else barGradientColors
@@ -207,13 +207,13 @@ fun BarChart(
                     )
                     //--------------------(showing the x axis labels)--------------------//
                     drawContext.canvas.nativeCanvas.drawText(
-                        item.key.toString(),
+                        item.key,
                         spaceStep + barWidth / 2,
                         size.height,
                         paint
                     )
                     //--------------------(showing the bar label)--------------------//
-                    if (chosenBarKey == item.key.toString()) {
+                    if (chosenBarKey == item.key) {
                         val localLabelColor = Color(
                             ColorUtils.blendARGB(
                                 Color.White.toArgb(), barColor.toArgb(), 0.4f

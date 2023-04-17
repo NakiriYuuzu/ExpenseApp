@@ -91,8 +91,6 @@ fun ExpenseScreen(
         }
     }
 
-    viewModel.getBarChartData(state.expenses)
-
     if (showSheet) {
         BottomSheetDialog(
             onDismissRequest = { showSheet = false },
@@ -227,36 +225,6 @@ fun ExpenseScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            CardOfSpendAndBudget(
-                title = "Monthly Remaining Budget",
-                remainingCost = viewModel.budget.value - viewModel.monthlyExpense.value,
-                budgetCost = viewModel.budget.value,
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            BarChart(
-                data = mapOf(
-                    Pair("Mon", 5f),
-                    Pair("Tue", 4f),
-                    Pair("Wed", 3f),
-                    Pair("Thu", 2f),
-                    Pair("Fri", 3f),
-                    Pair("Sat", 4f),
-                    Pair("Sun", 5f),
-                ),
-                offer = 5f,
-                title = "Weekly Expenses",
-                height = 250.dp,
-                isExpanded = showChart,
-                bottomEndRadius = 30.dp,
-                bottomStartRadius = 30.dp,
-            ) {
-                showChart = !showChart
-            }
-
             val today = LocalDate.now()
             val yesterday = today.minusDays(1)
             val thisWeek = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
@@ -271,39 +239,74 @@ fun ExpenseScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .clip(shape = MaterialTheme.shapes.large)
-                    .clickable {
-                        // TODO: navigate to expense list screen
-                        Log.e("ExpenseScreen ", "ROW: $it")
-                    },
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "See All",
-                    color = MaterialTheme.colors.onSurface,
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontFamily = CustomFont,
-                        fontWeight = FontWeight.SemiBold,
-                        textDecoration = TextDecoration.Underline
-                    ),
-                    modifier = Modifier.padding(start = 4.dp)
-                )
+            CardOfSpendAndBudget(
+                title = "Monthly Remaining Budget",
+                remainingCost = viewModel.budget.value - viewModel.monthlyExpense.value,
+                budgetCost = viewModel.budget.value,
+            )
 
-                Icon(
-                    imageVector = Icons.Default.ArrowForward,
-                    contentDescription = "向右箭头",
-                    modifier = Modifier
-                        .size(24.dp)
-                        .padding(start = 4.dp)
-                )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            BarChart(
+                data = viewModel.getBarChartData(state.expenses),
+                offer = viewModel.budget.value / 30,
+                title = "Weekly Expenses",
+                height = 250.dp,
+                isExpanded = showChart,
+                bottomEndRadius = 30.dp,
+                bottomStartRadius = 30.dp,
+            ) {
+                showChart = !showChart
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "This Week Expenses",
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontFamily = CustomFont,
+                        fontWeight = FontWeight.Bold,
+                    )
+                )
+
+                Row(
+                    modifier = Modifier
+                        .clip(shape = MaterialTheme.shapes.large)
+                        .clickable {
+                            // TODO: navigate to expense list screen
+                            Log.e("ExpenseScreen ", "ROW: $it")
+                        },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "See All",
+                        color = MaterialTheme.colors.onSurface,
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = CustomFont,
+                            fontWeight = FontWeight.SemiBold,
+                            textDecoration = TextDecoration.Underline
+                        ),
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        contentDescription = "向右箭头",
+                        modifier = Modifier
+                            .size(24.dp)
+                            .padding(start = 4.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
 

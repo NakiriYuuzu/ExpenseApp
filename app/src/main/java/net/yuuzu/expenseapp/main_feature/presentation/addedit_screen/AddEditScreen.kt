@@ -68,6 +68,9 @@ fun AddEditScreen(
                 is AddEditViewModel.UiEvent.SaveExpense -> {
                     navController?.navigateUp()
                 }
+                is AddEditViewModel.UiEvent.DeleteExpense -> {
+                    navController?.navigateUp()
+                }
             }
         }
     }
@@ -91,7 +94,7 @@ fun AddEditScreen(
                 if (viewModel.currentExpenseId != null) {
                     FloatingActionButton(
                         onClick = {
-                            // TODO: Delete expense
+                            viewModel.onEvent(AddEditEvent.DeleteExpense)
                         },
                         backgroundColor = MaterialTheme.colors.surface
                     ) {

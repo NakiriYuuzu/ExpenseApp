@@ -92,6 +92,21 @@ class AddEditViewModel @Inject constructor(
                     }
                 }
             }
+            is AddEditEvent.DeleteExpense -> {
+                viewModelScope.launch {
+                    expenseUseCase.deleteExpense(
+                        Expense(
+                            title = state.value.title,
+                            detail = "null",
+                            cost = convertToDouble(state.value.amount),
+                            category = state.value.category,
+                            timestamp = convertToTimestamp(state.value.date),
+                            id = currentExpenseId
+                        )
+                    )
+                    _eventFlow.emit(UiEvent.DeleteExpense)
+                }
+            }
         }
     }
 
@@ -127,5 +142,7 @@ class AddEditViewModel @Inject constructor(
     sealed class UiEvent {
         data class ShowSnackbar(val message: String): UiEvent()
         object SaveExpense: UiEvent()
+
+        object DeleteExpense: UiEvent()
     }
 }

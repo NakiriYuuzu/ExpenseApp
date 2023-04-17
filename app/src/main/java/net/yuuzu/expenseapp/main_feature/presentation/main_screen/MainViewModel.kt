@@ -14,7 +14,6 @@ import net.yuuzu.expenseapp.main_feature.data.repository.StoreSettingRepositoryI
 import net.yuuzu.expenseapp.main_feature.domain.model.Expense
 import net.yuuzu.expenseapp.main_feature.domain.model.InvalidExpenseException
 import net.yuuzu.expenseapp.main_feature.domain.usecases.ExpenseUseCase
-import net.yuuzu.expenseapp.main_feature.presentation.util.WeeklySpent
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
@@ -165,16 +164,16 @@ class MainViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    fun getBarChartData(expensesList: List<Expense>): List<WeeklySpent> {
+    fun getBarChartData(expensesList: List<Expense>): Map<String, Double> {
         val today = LocalDate.now()
-        val weeklySpent = mutableListOf<WeeklySpent>()
+        val weeklySpent = mutableMapOf<String, Double>()
 
         for (i in 6 downTo 0) {
             val day = today.minusDays(i.toLong())
             val expensesOnDay = expensesList.filter { convertToDateString(it.timestamp) == day }
             val total = expensesOnDay.sumOf { expense -> expense.cost }
             val dayOfWeek = day.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-            weeklySpent.add(WeeklySpent(dayOfWeek, total))
+            weeklySpent[dayOfWeek] = total
         }
 
         Log.e("TAG", "getBarChartData: $weeklySpent")
