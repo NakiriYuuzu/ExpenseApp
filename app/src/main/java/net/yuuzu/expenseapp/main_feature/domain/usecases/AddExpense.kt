@@ -10,6 +10,9 @@ class AddExpense(private val expenseRepository: ExpenseRepository) {
         if (expense.title.isBlank()) {
             throw InvalidExpenseException("The title of the expense can't be empty.")
         }
+        if (expense.cost <= 0) {
+            throw InvalidExpenseException("The amount of the expense must be greater than 0.")
+        }
         expenseRepository.insertExpense(expense)
     }
 }

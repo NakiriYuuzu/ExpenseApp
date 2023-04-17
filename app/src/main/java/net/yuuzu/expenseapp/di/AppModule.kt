@@ -8,11 +8,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.yuuzu.expenseapp.main_feature.data.data_source.ExpenseDatabase
 import net.yuuzu.expenseapp.main_feature.data.repository.ExpenseRepositoryImpl
-import net.yuuzu.expenseapp.main_feature.data.repository.StoreSettingRepositoryImpl
 import net.yuuzu.expenseapp.main_feature.domain.repository.ExpenseRepository
-import net.yuuzu.expenseapp.main_feature.domain.repository.StoreSettingRepository
 import net.yuuzu.expenseapp.main_feature.domain.usecases.*
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -43,7 +40,7 @@ object AppModule {
             deleteExpense = DeleteExpense(repository),
             addExpense = AddExpense(repository),
             getExpense = GetExpense(repository),
-            getSevenExpenses = GetExpenseByDate(repository),
+            getExpenseByDate = GetExpenseByDate(repository),
         )
     }
 }

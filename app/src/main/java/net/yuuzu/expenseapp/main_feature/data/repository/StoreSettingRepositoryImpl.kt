@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import net.yuuzu.expenseapp.main_feature.data.util.CategoryColor
 import net.yuuzu.expenseapp.main_feature.domain.repository.StoreSettingRepository
 import javax.inject.Inject
 
@@ -16,7 +17,20 @@ class StoreSettingRepositoryImpl @Inject constructor(
 
     companion object {
         private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("settings")
+
+        private val DEFAULT_CATEGORY_COLOR_LIST = listOf(
+            CategoryColor("Others", "#E1BEE7"),
+            CategoryColor("Food", "#FFCDD2"),
+            CategoryColor("Health", "#FF9574"),
+            CategoryColor("Transportation", "#F0F4C3"),
+            CategoryColor("Entertainment", "#B2DFDB"),
+            CategoryColor("Shopping", "#BBDEFB"),
+            CategoryColor("Subscription", "#7986CB"),
+        )
+
         const val BUDGET_KEY = "budget"
+        const val NAME_KEY = "name"
+        const val CATEGORY_COLOR_KEY = "category_color_"
     }
 
     override suspend fun saveOneToStore(key: String, value: String) {
@@ -31,6 +45,13 @@ class StoreSettingRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun saveCategoryColor(value: CategoryColor) {
+        val key = stringPreferencesKey(CATEGORY_COLOR_KEY + value.category)
+        context.dataStore.edit { preferences ->
+            preferences[key] = value.color
+        }
+    }
+
     override fun getOneFromStore(key: String): Flow<String> {
         return context.dataStore.data
             .map { preferences ->
@@ -42,6 +63,28 @@ class StoreSettingRepositoryImpl @Inject constructor(
         return context.dataStore.data
             .map { preferences ->
                 return@map decode(preferences[stringPreferencesKey(key)] ?: "")
+            }
+    }
+
+    override fun getCategoryColor(): Flow<List<CategoryColor>?> {
+        return context.dataStore.data
+            .map { preferences ->
+                val filterPreferences = preferences.asMap()
+                    .filter { (key, _) -> key.name.startsWith(CATEGORY_COLOR_KEY) }
+
+                if (filterPreferences.isEmpty()) {
+                    DEFAULT_CATEGORY_COLOR_LIST.forEach { categoryColor ->  
+                        saveCategoryColor(categoryColor)
+                    }
+                }
+
+                preferences.asMap()
+                    .filter { (key, _) -> key.name.startsWith(CATEGORY_COLOR_KEY) }
+                    .mapNotNull { (key, value) ->
+                        val category = key.name.removePrefix(CATEGORY_COLOR_KEY)
+                        val color = value as? String ?: return@mapNotNull null
+                        CategoryColor(category, color)
+                    }
             }
     }
 

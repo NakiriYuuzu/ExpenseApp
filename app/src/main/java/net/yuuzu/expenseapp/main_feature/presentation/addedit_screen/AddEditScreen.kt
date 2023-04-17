@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.Paid
@@ -47,7 +48,7 @@ fun AddEditScreen(
 
     val state = viewModel.state.value
 
-    val categories = listOf("None", "Food", "Transportation", "Entertainment", "Shopping", "Health", "Other")
+    val categories = listOf("Others", "Food", "Health", "Transportation", "Entertainment", "Shopping", "Subscription")
     val title = if (viewModel.currentExpenseId == null) "New Expense" else state.title
 
     var isDatePickerOpen by remember { mutableStateOf(false) }
@@ -86,13 +87,32 @@ fun AddEditScreen(
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    viewModel.onEvent(AddEditEvent.SaveExpense)
-                },
-                backgroundColor = MaterialTheme.colors.surface
-            ) {
-                Icon(imageVector = Icons.Default.Save, contentDescription = "Add expense")
+            Column {
+                if (viewModel.currentExpenseId != null) {
+                    FloatingActionButton(
+                        onClick = {
+                            // TODO: Delete expense
+                        },
+                        backgroundColor = MaterialTheme.colors.surface
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete expense",
+                            tint = MaterialTheme.colors.error
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                FloatingActionButton(
+                    onClick = {
+                        viewModel.onEvent(AddEditEvent.SaveExpense)
+                    },
+                    backgroundColor = MaterialTheme.colors.surface
+                ) {
+                    Icon(imageVector = Icons.Default.Save, contentDescription = "Add expense")
+                }
             }
         },
         scaffoldState = scaffoldState,

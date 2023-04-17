@@ -1,12 +1,10 @@
 package net.yuuzu.expenseapp.main_feature.presentation.main_screen.components
 
 import android.graphics.Paint
-import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -34,11 +32,12 @@ fun GradientProgressbar(
     ),
     animationDuration: Int = 1000,
     animationDelay: Int = 0,
-    remainingCost: Float,
-    budgetCost: Float,
+    remainingCost: Double,
+    budgetCost: Double,
 ) {
 
-    val targetValue = (remainingCost / budgetCost) * 100
+    val calculateValue = if (remainingCost > budgetCost) 100f else if (remainingCost <= 0) 0f else (remainingCost / budgetCost) * 100
+    val targetValue = calculateValue.toFloat()
 
     val animateNumber = animateFloatAsState(
         targetValue = targetValue,

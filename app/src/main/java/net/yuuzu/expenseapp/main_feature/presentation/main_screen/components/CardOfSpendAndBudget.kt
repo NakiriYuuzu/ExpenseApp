@@ -20,8 +20,8 @@ import net.yuuzu.expenseapp.ui.theme.CustomFont
 @Composable
 fun CardOfSpendAndBudget(
     title: String,
-    remainingCost: Float,
-    budgetCost: Float,
+    remainingCost: Double,
+    budgetCost: Double,
     backgroundColor: Color = MaterialTheme.colors.surface,
     shape: RoundedCornerShape = RoundedCornerShape(25.dp)
 ) {
@@ -52,7 +52,7 @@ fun CardOfSpendAndBudget(
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "$%.2f".format(remainingCost),
-                    color = MaterialTheme.colors.onSurface,
+                    color = if (remainingCost <= 0) MaterialTheme.colors.error else MaterialTheme.colors.onSurface,
                     fontSize = 28.sp,
                     fontFamily = CustomFont,
                     fontWeight = FontWeight.Bold,

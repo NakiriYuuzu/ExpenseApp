@@ -29,6 +29,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.holix.android.bottomsheetdialog.compose.BottomSheetDialog
 import com.holix.android.bottomsheetdialog.compose.BottomSheetDialogProperties
+import kotlinx.coroutines.flow.collectLatest
 import net.yuuzu.expenseapp.main_feature.presentation.addedit_screen.components.OutlinedTextFieldWithErrorText
 import net.yuuzu.expenseapp.main_feature.presentation.details_screen.components.BarChart
 import net.yuuzu.expenseapp.main_feature.presentation.main_screen.components.CardOfSpendAndBudget
@@ -39,6 +40,9 @@ import net.yuuzu.expenseapp.ui.theme.SeedColor
 import net.yuuzu.expenseapp.ui.theme.Shapes
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.temporal.ChronoField
 import java.time.temporal.TemporalAdjusters
 import java.util.*
 
@@ -53,18 +57,43 @@ fun ExpenseScreen(
     var showSheet by remember { mutableStateOf(false) }
 
     var setName by remember { mutableStateOf("") }
+    var errorName by remember { mutableStateOf("") }
+    var errorBudget by remember { mutableStateOf("") }
     var setBudget by remember { mutableStateOf("") }
 
     val state = viewModel.state.value
-    val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
+
+    Log.e("TAG", "CategoryColors: ${state.categoryColors}")
+
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest {event ->
+            when (event) {
+                is MainViewModel.UiEvent.ShowErrorField -> {
+                    when (event.type) {
+                        "Name" -> {
+                            errorName = event.message
+                        }
+                        "Budget" -> {
+                            errorBudget = event.message
+                        }
+                        "error" -> {
+                            errorName = event.message
+                            errorBudget = event.message
+                        }
+                    }
+                }
+                is MainViewModel.UiEvent.SaveToStore -> {
+                    showSheet = false
+                }
+            }
+        }
+    }
 
     if (showSheet) {
         BottomSheetDialog(
             onDismissRequest = { showSheet = false },
-            properties = BottomSheetDialogProperties(
-
-            )
+            properties = BottomSheetDialogProperties()
         ) {
             Surface(
                 shape = MaterialTheme.shapes.large,
@@ -74,10 +103,11 @@ fun ExpenseScreen(
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
+
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Hello World",
+                        text = "Settings",
                         style = TextStyle(
                             fontSize = 20.sp,
                             fontFamily = CustomFont,
@@ -90,6 +120,7 @@ fun ExpenseScreen(
                     OutlinedTextFieldWithErrorText(
                         text = setName,
                         hint = "Set Name",
+                        error = errorName,
                         onValueChange = { setName = it }
                     )
 
@@ -98,6 +129,7 @@ fun ExpenseScreen(
                     OutlinedTextFieldWithErrorText(
                         text = setBudget,
                         hint = "Set Budget",
+                        error = errorBudget,
                         onValueChange = { setBudget = it },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         trailingIcon = {
@@ -118,7 +150,7 @@ fun ExpenseScreen(
 
                     Button(
                         onClick = {
-                            showSheet = false
+                            viewModel.onEvent(MainEvent.SaveToStore(setName, setBudget))
                         }
                     ) {
                         Text(
@@ -162,8 +194,16 @@ fun ExpenseScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+
+                val timeOfDay = when (LocalDateTime.now(ZoneId.systemDefault()).get(ChronoField.HOUR_OF_DAY)) {
+                    in 0..11 -> "Morning"
+                    12 -> "Afternoon"
+                    in 13..17 -> "Evening"
+                    else -> "Night"
+                }
+
                 Text(
-                    text = "Hello, Yuuzu!",
+                    text = "$timeOfDay, ${viewModel.name.value}!",
                     color = MaterialTheme.colors.onSurface,
                     fontSize = 24.sp,
                     fontFamily = CustomFont,
@@ -186,8 +226,8 @@ fun ExpenseScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             CardOfSpendAndBudget(
-                title = "Total Remaining Budget",
-                remainingCost = 9000f,
+                title = "Monthly Remaining Budget",
+                remainingCost = viewModel.budget.value - viewModel.monthlyExpense.value,
                 budgetCost = viewModel.budget.value,
             )
 
@@ -211,6 +251,17 @@ fun ExpenseScreen(
                 bottomStartRadius = 30.dp,
             ) {
                 showChart = !showChart
+            }
+
+            val today = LocalDate.now()
+            val yesterday = today.minusDays(1)
+            val thisWeek = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+
+            val todayItems = state.expenses.filter { convertToDateString(it.timestamp) == today }
+            val yesterdayItems = state.expenses.filter { convertToDateString(it.timestamp) == yesterday }
+            val thisWeekItems = state.expenses.filter {
+                val date = convertToDateString(it.timestamp)
+                date >= thisWeek && date != today && date != yesterday
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -250,17 +301,6 @@ fun ExpenseScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            val today = LocalDate.now()
-            val yesterday = today.minusDays(1)
-            val thisWeek = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
-
-            val todayItems = state.expenses.filter { convertToDateString(it.timestamp) == today }
-            val yesterdayItems = state.expenses.filter { convertToDateString(it.timestamp) == yesterday }
-            val thisWeekItems = state.expenses.filter {
-                val date = convertToDateString(it.timestamp)
-                date >= thisWeek && date != today && date != yesterday
-            }
-
             LazyColumn(modifier = Modifier.fillMaxSize()) {
 
                 itemsIndexed(todayItems) { index, expense ->
@@ -291,7 +331,10 @@ fun ExpenseScreen(
 
                 itemsIndexed(yesterdayItems) { index, expense ->
                     if (index == 0) {
-                        Spacer(modifier = Modifier.height(16.dp))
+
+                        if (todayItems.isNotEmpty())
+                            Spacer(modifier = Modifier.height(16.dp))
+
                         Text(
                             text = "Yesterday",
                             color = MaterialTheme.colors.onSurface,
@@ -318,7 +361,10 @@ fun ExpenseScreen(
 
                 itemsIndexed(thisWeekItems) { index, expense ->
                     if (index == 0) {
-                        Spacer(modifier = Modifier.height(16.dp))
+
+                        if (todayItems.isNotEmpty() || yesterdayItems.isNotEmpty())
+                            Spacer(modifier = Modifier.height(16.dp))
+
                         Text(
                             text = "This Week",
                             color = MaterialTheme.colors.onSurface,

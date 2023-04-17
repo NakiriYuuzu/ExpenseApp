@@ -4,6 +4,6 @@ data class AddEditState(
     var title: String = "",
     var detail: String = "",
     var amount: String = "",
-    var category: String = "None",
+    var category: String = "Others",
     var date: String = "",
 )
