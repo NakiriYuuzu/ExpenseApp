@@ -1,5 +1,7 @@
 package net.yuuzu.expenseapp.main_feature.presentation.main_screen
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -12,8 +14,13 @@ import net.yuuzu.expenseapp.main_feature.data.repository.StoreSettingRepositoryI
 import net.yuuzu.expenseapp.main_feature.domain.model.Expense
 import net.yuuzu.expenseapp.main_feature.domain.model.InvalidExpenseException
 import net.yuuzu.expenseapp.main_feature.domain.usecases.ExpenseUseCase
+import net.yuuzu.expenseapp.main_feature.presentation.util.WeeklySpent
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.format.TextStyle
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -158,8 +165,32 @@ class MainViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    fun getBarChartData(expensesList: List<Expense>): List<WeeklySpent> {
+        val today = LocalDate.now()
+        val weeklySpent = mutableListOf<WeeklySpent>()
+
+        for (i in 6 downTo 0) {
+            val day = today.minusDays(i.toLong())
+            val expensesOnDay = expensesList.filter { convertToDateString(it.timestamp) == day }
+            val total = expensesOnDay.sumOf { expense -> expense.cost }
+            val dayOfWeek = day.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+            weeklySpent.add(WeeklySpent(dayOfWeek, total))
+        }
+
+        Log.e("TAG", "getBarChartData: $weeklySpent")
+        return weeklySpent
+    }
+
+
     private fun convertToDouble(amount: String): Double {
         return amount.toDoubleOrNull() ?: throw InvalidExpenseException("Invalid amount.")
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun convertToDateString(timestamp: Long): LocalDate {
+        val date = Date(timestamp)
+        val formatter = SimpleDateFormat("yyyy-MM-dd")
+        return LocalDate.parse(formatter.format(date))
     }
 
     sealed class UiEvent {

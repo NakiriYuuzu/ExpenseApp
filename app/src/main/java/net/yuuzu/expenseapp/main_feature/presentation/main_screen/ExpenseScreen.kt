@@ -64,31 +64,34 @@ fun ExpenseScreen(
     val state = viewModel.state.value
     val scaffoldState = rememberScaffoldState()
 
-    Log.e("TAG", "CategoryColors: ${state.categoryColors}")
-
     LaunchedEffect(key1 = true) {
-        viewModel.eventFlow.collectLatest {event ->
+        viewModel.eventFlow.collectLatest { event ->
             when (event) {
                 is MainViewModel.UiEvent.ShowErrorField -> {
                     when (event.type) {
                         "Name" -> {
                             errorName = event.message
                         }
+
                         "Budget" -> {
                             errorBudget = event.message
                         }
+
                         "error" -> {
                             errorName = event.message
                             errorBudget = event.message
                         }
                     }
                 }
+
                 is MainViewModel.UiEvent.SaveToStore -> {
                     showSheet = false
                 }
             }
         }
     }
+
+    viewModel.getBarChartData(state.expenses)
 
     if (showSheet) {
         BottomSheetDialog(
@@ -195,12 +198,13 @@ fun ExpenseScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
 
-                val timeOfDay = when (LocalDateTime.now(ZoneId.systemDefault()).get(ChronoField.HOUR_OF_DAY)) {
-                    in 0..11 -> "Morning"
-                    12 -> "Afternoon"
-                    in 13..17 -> "Evening"
-                    else -> "Night"
-                }
+                val timeOfDay =
+                    when (LocalDateTime.now(ZoneId.systemDefault()).get(ChronoField.HOUR_OF_DAY)) {
+                        in 0..11 -> "Morning"
+                        12 -> "Afternoon"
+                        in 13..17 -> "Evening"
+                        else -> "Night"
+                    }
 
                 Text(
                     text = "$timeOfDay, ${viewModel.name.value}!",
@@ -258,7 +262,8 @@ fun ExpenseScreen(
             val thisWeek = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
 
             val todayItems = state.expenses.filter { convertToDateString(it.timestamp) == today }
-            val yesterdayItems = state.expenses.filter { convertToDateString(it.timestamp) == yesterday }
+            val yesterdayItems =
+                state.expenses.filter { convertToDateString(it.timestamp) == yesterday }
             val thisWeekItems = state.expenses.filter {
                 val date = convertToDateString(it.timestamp)
                 date >= thisWeek && date != today && date != yesterday
@@ -266,40 +271,39 @@ fun ExpenseScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (state.expenses.isNotEmpty()) {
-                Row(
+            Row(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .clip(shape = MaterialTheme.shapes.large)
+                    .clickable {
+                        // TODO: navigate to expense list screen
+                        Log.e("ExpenseScreen ", "ROW: $it")
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "See All",
+                    color = MaterialTheme.colors.onSurface,
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontFamily = CustomFont,
+                        fontWeight = FontWeight.SemiBold,
+                        textDecoration = TextDecoration.Underline
+                    ),
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+
+                Icon(
+                    imageVector = Icons.Default.ArrowForward,
+                    contentDescription = "向右箭头",
                     modifier = Modifier
-                        .align(Alignment.End)
-                        .clip(shape = MaterialTheme.shapes.large)
-                        .clickable {
-                            // TODO: navigate to expense list screen
-                            Log.e("ExpenseScreen ", "ROW: $it")
-                        },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = "See All",
-                        color = MaterialTheme.colors.onSurface,
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            fontFamily = CustomFont,
-                            fontWeight = FontWeight.SemiBold,
-                            textDecoration = TextDecoration.Underline
-                        ),
-                        modifier = Modifier.padding(start = 4.dp)
-                    )
-
-                    Icon(
-                        imageVector = Icons.Default.ArrowForward,
-                        contentDescription = "向右箭头",
-                        modifier = Modifier
-                            .size(24.dp)
-                            .padding(start = 4.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
+                        .size(24.dp)
+                        .padding(start = 4.dp)
+                )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
 
