@@ -9,18 +9,15 @@ Expense App is a simple and easy-to-use application for tracking your daily expe
     <table>
     <tr>
         <td>
-     ![img.png](doc/image/img.png)
-![img_1.png](doc/image/img_1.png)
-![img_2.png](doc/image/img_2.png)
-![img_3.png](doc/image/img_3.png)
+            <img src="https://raw.githubusercontent.com/NakiriYuuzu/ExpenseApp/master/doc/image/img_1.png" height="370" width="200">
         </td>
         <td>
        
-            <img src="doc/image/img_2.png" height="370" width="200">
+            <img src="[doc/image/img_2.png](https://raw.githubusercontent.com/NakiriYuuzu/ExpenseApp/master/doc/image/img_2.png)" height="370" width="200">
         </td>
         <td>
   
-            <img src="doc/image/img_3.png" height="370" width="200">
+            <img src="https://raw.githubusercontent.com/NakiriYuuzu/ExpenseApp/master/doc/image/img_3.png" height="370" width="200">
         </td>
 
     </tr>
