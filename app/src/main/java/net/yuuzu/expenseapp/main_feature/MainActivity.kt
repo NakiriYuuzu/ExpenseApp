@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
 import net.yuuzu.expenseapp.main_feature.presentation.addedit_screen.AddEditScreen
+import net.yuuzu.expenseapp.main_feature.presentation.details_screen.DetailScreen
 import net.yuuzu.expenseapp.main_feature.presentation.main_screen.ExpenseScreen
 import net.yuuzu.expenseapp.main_feature.presentation.util.Screen
 import net.yuuzu.expenseapp.ui.theme.ExpenseAppTheme
@@ -49,6 +50,9 @@ class MainActivity : ComponentActivity() {
                             )
                         ) {
                             AddEditScreen(navController = navController)
+                        }
+                        composable(route = Screen.DetailScreen.route) {
+                            DetailScreen(navController = navController)
                         }
                     }
                 }

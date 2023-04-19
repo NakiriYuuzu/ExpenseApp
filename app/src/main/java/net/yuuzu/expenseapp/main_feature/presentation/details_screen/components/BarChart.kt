@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.ColorUtils
 import kotlinx.coroutines.delay
+import net.yuuzu.expenseapp.main_feature.data.util.CategoryColor
+import net.yuuzu.expenseapp.main_feature.presentation.util.convertToColor
 import net.yuuzu.expenseapp.ui.theme.CustomFont
 
 @ExperimentalAnimationApi
@@ -45,6 +47,7 @@ import net.yuuzu.expenseapp.ui.theme.CustomFont
 fun BarChart(
     data: Map<String, Double>,
     offer: Double,
+    categoryColor: List<CategoryColor> = emptyList(),
     barCornersRadius: Float = 25f,
     barColor: Color = Color.Blue,
     barGradientColors: List<Color> = listOf(
@@ -191,7 +194,16 @@ fun BarChart(
                         y = (size.height - item.value * barScale - labelOffset).toFloat()
                     )
 
-                    val currentBarColor = if (item.value >= offer) barWarningsGradientColors else barGradientColors
+                    var barWarningsColor = barWarningsGradientColors
+
+                    if (categoryColor.isNotEmpty()) {
+                        barWarningsColor = listOf(
+                            convertToColor(categoryColor.find { it.category == item.key }?.color),
+                            convertToColor(categoryColor.find { it.category == item.key }?.color)
+                        )
+                    }
+
+                    val currentBarColor = if (item.value >= offer) barWarningsColor else barGradientColors
 
                     //--------------------(draw bars)--------------------//
                     drawRoundRect(
@@ -207,7 +219,7 @@ fun BarChart(
                     )
                     //--------------------(showing the x axis labels)--------------------//
                     drawContext.canvas.nativeCanvas.drawText(
-                        item.key,
+                        item.key.take(5),
                         spaceStep + barWidth / 2,
                         size.height,
                         paint

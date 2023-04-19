@@ -1,7 +1,5 @@
 package net.yuuzu.expenseapp.main_feature.presentation.main_screen
 
-import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -14,11 +12,11 @@ import net.yuuzu.expenseapp.main_feature.data.repository.StoreSettingRepositoryI
 import net.yuuzu.expenseapp.main_feature.domain.model.Expense
 import net.yuuzu.expenseapp.main_feature.domain.model.InvalidExpenseException
 import net.yuuzu.expenseapp.main_feature.domain.usecases.ExpenseUseCase
-import java.text.SimpleDateFormat
+import net.yuuzu.expenseapp.main_feature.presentation.util.convertToDateString
+import net.yuuzu.expenseapp.main_feature.presentation.util.convertToDouble
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.TextStyle
-import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
@@ -108,10 +106,7 @@ class MainViewModel @Inject constructor(
         // calculate total expense
         expenseUseCase.getExpenseByDate(start, end)
             .onEach { expenses ->
-                var total = 0.0
-                expenses.forEach { expense ->
-                    total += expense.cost
-                }
+                val total = expenses.sumOf { it.cost }
 
                 _monthlyExpense.value = total
             }
@@ -176,20 +171,7 @@ class MainViewModel @Inject constructor(
             weeklySpent[dayOfWeek] = total
         }
 
-        Log.e("TAG", "getBarChartData: $weeklySpent")
         return weeklySpent
-    }
-
-
-    private fun convertToDouble(amount: String): Double {
-        return amount.toDoubleOrNull() ?: throw InvalidExpenseException("Invalid amount.")
-    }
-
-    @SuppressLint("SimpleDateFormat")
-    private fun convertToDateString(timestamp: Long): LocalDate {
-        val date = Date(timestamp)
-        val formatter = SimpleDateFormat("yyyy-MM-dd")
-        return LocalDate.parse(formatter.format(date))
     }
 
     sealed class UiEvent {

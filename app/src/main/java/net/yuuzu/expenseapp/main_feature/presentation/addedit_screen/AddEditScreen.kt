@@ -47,8 +47,8 @@ fun AddEditScreen(
 ) {
 
     val state = viewModel.state.value
+    val categories = state.categoryColors.map { it.category }
 
-    val categories = listOf("Others", "Food", "Health", "Transportation", "Entertainment", "Shopping", "Subscription")
     val title = if (viewModel.currentExpenseId == null) "New Expense" else state.title
 
     var isDatePickerOpen by remember { mutableStateOf(false) }
@@ -76,6 +76,13 @@ fun AddEditScreen(
     }
 
     if (isDatePickerOpen) {
+
+        val startDate = if (state.date.isNotEmpty()) {
+            LocalDate.parse(state.date)
+        } else {
+            LocalDate.now()
+        }
+
         ComposeCalendar(
             onDone = {
                 isDatePickerOpen = false
@@ -84,7 +91,7 @@ fun AddEditScreen(
             onDismiss = {
                 isDatePickerOpen = false
             },
-            startDate = LocalDate.now()
+            startDate = startDate
         )
     }
 
@@ -163,9 +170,10 @@ fun AddEditScreen(
 
                     Text(
                         text = title,
-                        fontSize = 20.sp,
+                        fontSize = 24.sp,
                         fontFamily = CustomFont,
                         fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colors.onSurface
                     )
                 }
 

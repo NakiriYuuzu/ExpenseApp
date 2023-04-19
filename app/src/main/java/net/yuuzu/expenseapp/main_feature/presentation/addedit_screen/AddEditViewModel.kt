@@ -9,21 +9,24 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import net.yuuzu.expenseapp.main_feature.data.repository.StoreSettingRepositoryImpl
 import net.yuuzu.expenseapp.main_feature.domain.model.Expense
 import net.yuuzu.expenseapp.main_feature.domain.model.InvalidExpenseException
 import net.yuuzu.expenseapp.main_feature.domain.usecases.ExpenseUseCase
-import java.text.DecimalFormat
+import net.yuuzu.expenseapp.main_feature.presentation.util.convertToDecimal
+import net.yuuzu.expenseapp.main_feature.presentation.util.convertToDouble
+import net.yuuzu.expenseapp.main_feature.presentation.util.convertToTimestamp
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZoneId
 import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class AddEditViewModel @Inject constructor(
     private val expenseUseCase: ExpenseUseCase,
+    private val storeSettingRepositoryImpl: StoreSettingRepositoryImpl,
     savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
@@ -36,6 +39,7 @@ class AddEditViewModel @Inject constructor(
     var currentExpenseId: Int? = null
 
     init {
+        getCategoryColor()
         savedStateHandle.get<Int>("expenseId")?.let { expenseId ->
             if (expenseId != -1) {
                 viewModelScope.launch {
@@ -110,11 +114,13 @@ class AddEditViewModel @Inject constructor(
         }
     }
 
-    private fun convertToTimestamp(localDate: String): Long {
-        val currentDate = LocalDate.parse(localDate).atTime(LocalTime.now())
-        val timeZone = ZoneId.systemDefault()
-        val instant = currentDate.atZone(timeZone).toInstant()
-        return instant.toEpochMilli()
+    private fun getCategoryColor() {
+        storeSettingRepositoryImpl.getCategoryColor()
+            .onEach { categoryColors ->
+                if (categoryColors.isNullOrEmpty()) return@onEach
+                state.value = _state.value.copy(categoryColors = categoryColors)
+            }
+            .launchIn(viewModelScope)
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -124,25 +130,9 @@ class AddEditViewModel @Inject constructor(
         return formatter.format(date)
     }
 
-    private fun convertToDouble(amount: String): Double {
-        return amount.toDoubleOrNull() ?: throw InvalidExpenseException("Invalid amount.")
-    }
-
-    private fun convertToDecimal(amount: Double): String {
-        return if (amount > 9999999) {
-            val decimalFormat = DecimalFormat("#")
-            decimalFormat.maximumFractionDigits = amount.toString().length
-
-            decimalFormat.format(amount)
-        } else {
-            amount.toString()
-        }
-    }
-
     sealed class UiEvent {
         data class ShowSnackbar(val message: String): UiEvent()
         object SaveExpense: UiEvent()
-
         object DeleteExpense: UiEvent()
     }
 }

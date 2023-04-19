@@ -1,7 +1,6 @@
 package net.yuuzu.expenseapp.main_feature.presentation.main_screen
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
@@ -35,17 +34,18 @@ import net.yuuzu.expenseapp.main_feature.presentation.details_screen.components.
 import net.yuuzu.expenseapp.main_feature.presentation.main_screen.components.CardOfSpendAndBudget
 import net.yuuzu.expenseapp.main_feature.presentation.main_screen.components.ExpenseItem
 import net.yuuzu.expenseapp.main_feature.presentation.util.Screen
+import net.yuuzu.expenseapp.main_feature.presentation.util.convertToColor
+import net.yuuzu.expenseapp.main_feature.presentation.util.convertToDateString
 import net.yuuzu.expenseapp.ui.theme.CustomFont
-import net.yuuzu.expenseapp.ui.theme.SeedColor
 import net.yuuzu.expenseapp.ui.theme.Shapes
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
-import java.time.temporal.TemporalAdjusters
 import java.util.*
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ExpenseScreen(
@@ -227,7 +227,7 @@ fun ExpenseScreen(
 
             val today = LocalDate.now()
             val yesterday = today.minusDays(1)
-            val thisWeek = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+            val thisWeek = today.minusDays(6)
 
             val todayItems = state.expenses.filter { convertToDateString(it.timestamp) == today }
             val yesterdayItems =
@@ -267,11 +267,12 @@ fun ExpenseScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "This Week Expenses",
+                    text = "Weekly Expenses",
                     style = TextStyle(
                         fontSize = 20.sp,
                         fontFamily = CustomFont,
                         fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colors.onSurface
                     )
                 )
 
@@ -279,8 +280,7 @@ fun ExpenseScreen(
                     modifier = Modifier
                         .clip(shape = MaterialTheme.shapes.large)
                         .clickable {
-                            // TODO: navigate to expense list screen
-                            Log.e("ExpenseScreen ", "ROW: $it")
+                            navController.navigate(Screen.DetailScreen.route)
                         },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -325,7 +325,7 @@ fun ExpenseScreen(
 
                     ExpenseItem(
                         expense = expense,
-                        itemColor = SeedColor,
+                        itemColor = convertToColor(state.categoryColors.find { it.category == expense.category }?.color),
                         modifier = Modifier
                             .clip(Shapes.large)
                             .clickable {
@@ -355,7 +355,7 @@ fun ExpenseScreen(
 
                     ExpenseItem(
                         expense = expense,
-                        itemColor = SeedColor,
+                        itemColor = convertToColor(state.categoryColors.find { it.category == expense.category }?.color),
                         modifier = Modifier
                             .clip(Shapes.large)
                             .clickable {
@@ -367,13 +367,16 @@ fun ExpenseScreen(
                 }
 
                 itemsIndexed(thisWeekItems) { index, expense ->
-                    if (index == 0) {
+                    val previousExpense = if (index > 0) thisWeekItems[index - 1] else null
+                    val currentDateString = convertToDateString(expense.timestamp)
+                    val previousDateString = previousExpense?.let { convertToDateString(it.timestamp) }
 
-                        if (todayItems.isNotEmpty() || yesterdayItems.isNotEmpty())
+                    if (previousDateString != currentDateString) {
+                        if (todayItems.isNotEmpty() || yesterdayItems.isNotEmpty() || index != 0)
                             Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-                            text = "This Week",
+                            text = currentDateString.format(DateTimeFormatter.ofPattern("EEEE, MMM d, yyyy")),
                             color = MaterialTheme.colors.onSurface,
                             fontSize = 18.sp,
                             fontFamily = CustomFont,
@@ -385,7 +388,7 @@ fun ExpenseScreen(
 
                     ExpenseItem(
                         expense = expense,
-                        itemColor = SeedColor,
+                        itemColor = convertToColor(state.categoryColors.find { it.category == expense.category }?.color),
                         modifier = Modifier
                             .clip(Shapes.large)
                             .clickable {
@@ -398,11 +401,4 @@ fun ExpenseScreen(
             }
         }
     }
-}
-
-@SuppressLint("SimpleDateFormat")
-private fun convertToDateString(timestamp: Long): LocalDate {
-    val date = Date(timestamp)
-    val formatter = SimpleDateFormat("yyyy-MM-dd")
-    return LocalDate.parse(formatter.format(date))
 }
