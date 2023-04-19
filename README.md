@@ -9,8 +9,10 @@ Expense App is a simple and easy-to-use application for tracking your daily expe
     <table>
     <tr>
         <td>
-     
-            <img src="doc/image/img.png" height="370" width="200">
+     ![img.png](doc/image/img.png)
+![img_1.png](doc/image/img_1.png)
+![img_2.png](doc/image/img_2.png)
+![img_3.png](doc/image/img_3.png)
         </td>
         <td>
        
