@@ -14,11 +14,9 @@ Expense App is a simple and easy-to-use application for tracking your daily expe
 ---
 
 - Create and edit expenses with ease
-- Categorize expenses into different categories
-- View spending patterns with interactive charts
-- Set budgets for each category
-- Export expenses to CSV format
-
+- Set budgets for monthly expenses
+- View monthly expenses with bar charts 
+- no account required, no internet connection required
 
 ## Getting Started
 
