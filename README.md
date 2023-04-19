@@ -4,11 +4,26 @@ Expense App is a simple and easy-to-use application for tracking your daily expe
 
 ## Screenshots & Demo
 
-![img.png](doc/image/img.png)
-![img_1.png](doc/image/img_1.png)
-![img_2.png](doc/image/img_2.png)
-![img_3.png](doc/image/img_3.png)
 
+<div style="overflow-x: auto;">
+    <table>
+    <tr>
+        <td>
+     
+            <img src="doc/image/img.png" height="370" width="200">
+        </td>
+        <td>
+       
+            <img src="doc/image/img_2.png" height="370" width="200">
+        </td>
+        <td>
+  
+            <img src="doc/image/img_3.png" height="370" width="200">
+        </td>
+
+    </tr>
+    </table>
+</div>
 ## Features
 
 ---
