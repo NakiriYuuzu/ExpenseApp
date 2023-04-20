@@ -3,12 +3,21 @@
 Expense App is a simple and easy-to-use application for tracking your daily expenses. With a clean and intuitive interface, you can easily record your expenses, view your spending patterns, and set budgets for different categories.
 
 ## Screenshots & Demo
-
-![img.png](doc/image/img.png)
-![img_1.png](doc/image/img_1.png)
-![img_2.png](doc/image/img_2.png)
-![img_3.png](doc/image/img_3.png)
-
+<div style="overflow-x: auto;">
+    <table>
+    <tr>
+        <td>
+              <img src="https://raw.githubusercontent.com/NakiriYuuzu/ExpenseApp/master/doc/image/img_1.png" height="370" width="200">
+        </td>
+        <td>
+            <img src="https://raw.githubusercontent.com/NakiriYuuzu/ExpenseApp/master/doc/image/img_2.png" height="370" width="200">
+        </td>
+        <td>
+            <img src="https://raw.githubusercontent.com/NakiriYuuzu/ExpenseApp/master/doc/image/img_3.png" height="370" width="200">
+        </td>
+    </tr>
+    </table>
+</div>
 ## Features
 
 ---
