@@ -1,6 +1,6 @@
 # 💰 Expense App 💰
 
-Expense App is a simple and easy-to-use application for tracking your daily expenses. With a clean and intuitive interface, you can easily record your expenses, view your spending patterns, and set budgets for different categories.
+Expense App is a simple and easy-to-use application for tracking your weekly expenses. With a clean and intuitive interface, you can easily record your expenses, view your spending patterns, and set budgets for different categories.
 
 ## Screenshots & Demo
 <div style="overflow-x: auto;">
